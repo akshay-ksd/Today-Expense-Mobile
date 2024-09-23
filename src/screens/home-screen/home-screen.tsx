@@ -1,5 +1,5 @@
-import { View, Text, NativeModules, ActivityIndicator } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import { View, Text, NativeModules, DeviceEventEmitter } from 'react-native'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styles from './style'
 import PopUp from '../../components/molecule/popup/popup'
 import usePopup from '../../service/zustand/usePopup'
@@ -38,6 +38,22 @@ const HomeScreen = () => {
         }
     }, [isPopup])
 
+    const [expenses, setExpenses] = useState([]);
+
+    useEffect(() => {
+        // Subscribe to the 'ExpenseAdded' event emitted from the native side
+        const subscription = DeviceEventEmitter.addListener('ExpenseAdded', (e) => {
+            addDataFromNotification(e?.expense,e?.description)
+            // Add your logic to handle the event here, e.g., updating the UI
+        });
+
+        // Cleanup subscription when component is unmounted
+        return () => {
+            subscription.remove();
+        };
+    }, [lastDate]);
+
+
 
     const getAllExpenses = async () => {
 
@@ -65,7 +81,7 @@ const HomeScreen = () => {
             const sortedExpenses = _.sortBy(filteredExpenses, [(expense: Expense) => {
                 return parseDate(expense.date).getTime(); // Adjust this based on actual data structure
             }], ['desc']); // Sort descending; remove 'desc' for ascending
-            const totalExpense = sortedExpenses.reduce((sum, item) => sum + parseInt(item.expense), 0);
+            const totalExpense = sortedExpenses.reduce((sum, item) => sum + parseFloat(item.expense), 0);
             setTimeout(() => {
                 setTotal(totalExpense)
                 setLoading(false);
@@ -92,9 +108,9 @@ const HomeScreen = () => {
 
             const results = _.map(groupedExpenses, (expenses, dateKey) => ({
                 description: dateKey,
-                expense: _.sumBy(expenses, exp => parseInt(exp.expense))
+                expense: _.sumBy(expenses, exp => parseFloat(exp.expense))
             }));
-            const totalExpense = results.reduce((sum, item) => sum + parseInt(item.expense), 0);
+            const totalExpense = results.reduce((sum, item) => sum + parseFloat(item.expense), 0);
             setTimeout(() => {
                 setTotal(totalExpense)
                 setLoading(false);
@@ -127,10 +143,10 @@ const HomeScreen = () => {
             const results = _.mapValues(groupedExpenses, (expenses, month) => {
                 return {
                     description: new Date(year, month).toLocaleString('default', { month: 'long' }),
-                    expense: _.sumBy(expenses, exp => parseInt(exp.expense))
+                    expense: _.sumBy(expenses, exp => parseFloat(exp.expense))
                 };
             });
-            const totalExpense = Object.values(results).reduce((sum, item) => sum + parseInt(item.expense), 0);
+            const totalExpense = Object.values(results).reduce((sum, item) => sum + parseFloat(item.expense), 0);
 
 
             setTimeout(() => {
@@ -205,6 +221,22 @@ const HomeScreen = () => {
 
         }, 800);
     };
+    const addDataFromNotification = useCallback(async (expense: string, description: string) => {
+        const date = getCurrentFormattedDate(new Date());
+        const lDate = getCurrentFormattedDate(lastDate || new Date());
+        
+        console.log("expense", expense, "description", description);
+        console.log(getCurrentFormattedDate(lastDate), date, lDate == date);
+    
+        if (lDate === date) {
+            setSelect("");
+            const lastId = await loadLastId() - 1;
+            const data = { id: lastId, expense, description, date };
+            
+            recyclerRef.current?.addNewData(data);
+            calculateTotal(date);
+        }
+    }, [lastDate]);
 
     const calculateTotal = async (date: any) => {
         const expenses: Expense[] = await ExpenseModule.getAllExpenses();
@@ -215,7 +247,7 @@ const HomeScreen = () => {
         const sortedExpenses = _.sortBy(filteredExpenses, [(expense: Expense) => {
             return parseDate(expense.date).getTime(); // Adjust this based on actual data structure
         }], ['desc']); // Sort descending; remove 'desc' for ascending
-        const totalExpense = sortedExpenses.reduce((sum, item) => sum + parseInt(item.expense), 0);
+        const totalExpense = sortedExpenses.reduce((sum, item) => sum + parseFloat(item.expense), 0);
         setTotal(totalExpense)
     }
 
@@ -242,35 +274,42 @@ const HomeScreen = () => {
             setTimeout(async () => {
                 ExpenseModule.deleteExpense(item?.id)
                     .then((response: any) => {
-                        console.log(response);
+                        calculateTotal(item?.date)
                         // Handle success (e.g., update your UI)
                     })
                     .catch((error: any) => {
                         console.error(error);
                         // Handle error
                     });
-                    if (getCurrentFormattedDate(new Date()) == item?.date) {
-                        BackgroundService.startService();
-                    }
+                if (getCurrentFormattedDate(new Date()) == item?.date) {
+                    BackgroundService.startService();
+                }
             }, 50);
         }, 150);
 
-        
+
     }
 
-    const updateItem =(amount:any, description:any, date:any,id:any)=>{
+    const updateItem = (amount: any, description: any, date: any, id: any, index) => {
         if (getCurrentFormattedDate(new Date()) == date) {
             BackgroundService.stopService();
 
         }
-        recyclerRef.current?.updateItem({expense:amount,description,date,id},id)
+
+        if (getCurrentFormattedDate(lastDate) == date) {
+            recyclerRef.current?.updateItem({ expense: amount, description, date, id }, id)
+        } else {
+
+            recyclerRef.current?.SpliceData(index);
+        }
         setTimeout(() => {
+            calculateTotal(date)
             if (getCurrentFormattedDate(new Date()) == date) {
                 BackgroundService.startService();
             }
         }, 500);
     }
-    
+
 
 
     const rowRenderer = (
@@ -284,7 +323,7 @@ const HomeScreen = () => {
     };
 
 
-    const emptyText =   <LottieView source={require('../../assets/lottie/noData.json')} autoPlay loop style={{ height: 120, width: 120 }} />
+    const emptyText = <LottieView source={require('../../assets/lottie/noData.json')} autoPlay loop style={{ height: 120, width: 120 }} />
     return (
         <View style={styles.container}>
             <Header filterData={filterData} total={total} />

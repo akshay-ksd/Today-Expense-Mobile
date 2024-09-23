@@ -63,7 +63,7 @@ const PopUp: FC<any> = ({ addData, lastDate, selectedItem, deleteItem, updateIte
       if (selectedItem) {
         ExpenseModule.updateExpense(selectedItem?.id, amount, description.trim(), date.toString())
           .then((res: any) => {
-            updateItem(amount, description.trim(), date.toString(),selectedItem?.id)
+            updateItem(amount, description.trim(), date.toString(),selectedItem?.id,selectedItem?.index)
             setAmount("")
             setDescription("")
             setDate("")

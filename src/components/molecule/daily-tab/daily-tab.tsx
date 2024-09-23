@@ -33,7 +33,6 @@ const DailyTab: React.FC<any> = ({filterByDaily,total}) => {
     const openCalender = () => {
         setOpen(true)
     }
-
     return (
         <View style={styles.container}>
             <Animated.View style={styles.box} entering={ZoomIn.duration(500)}>

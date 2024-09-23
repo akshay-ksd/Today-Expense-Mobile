@@ -7,7 +7,7 @@ import { bold } from '../../../components/constants/fonts'
 import Animated, { FadeInLeft, FadeInUp, FlipInEasyY, SlideInLeft, SlideInRight, SlideInUp, useAnimatedStyle, useSharedValue, withTiming, ZoomIn, ZoomInDown, ZoomInEasyDown, ZoomInEasyUp, } from 'react-native-reanimated'
 
 const SingleList: FC<any> = ({ item, selectLit, index }) => {
-    const AnimatedRipple = Animated.createAnimatedComponent(Ripple);
+    const AnimatedRipple:any = Animated.createAnimatedComponent(Ripple);
 
     const colorValue = useSharedValue("#fff");
 
@@ -17,22 +17,15 @@ const SingleList: FC<any> = ({ item, selectLit, index }) => {
         };
     });
 
-    // useEffect(() => {
-    //     setTimeout(() => {
-    //         colorValue.value = withTiming("white", { duration: 1000 })
-    //     }, 500);
-    // }, [])
-
-   
-
-    const Footer:any = {
+    // Handle string `expense`, converting it to float and checking for invalid values
+    const formattedExpense = item?.expense && !isNaN(parseFloat(item.expense))
+        ? parseFloat(item.expense).toFixed(2) // Valid string expense
+        : '0.00'; // Fallback for invalid or empty strings
+    const Footer: any = {
         0: <View style={{ height: 100 }} />
     }
     return (
         <Animated.View style={[styles.container]}>
-            {/* {
-                Footer[index]
-            } */}
             <AnimatedRipple style={[styles.box, animatedStyle]} onPress={() => selectLit(item)} disabled={item?.date ? false : true}>
                 <View style={styles.iconContainer}>
                     <Animated.View >
@@ -40,9 +33,8 @@ const SingleList: FC<any> = ({ item, selectLit, index }) => {
                     </Animated.View>
                     <Text style={styles.title}>{item?.description}</Text>
                 </View>
-                <Text style={[styles.title, { color: "black", marginLeft: 0, fontWeight: "700", fontFamily: bold }]}>₹ {parseInt(item?.expense).toFixed(2)}</Text>
+                <Text style={[styles.title, { color: "black", marginLeft: 0, fontWeight: "700", fontFamily: bold }]}>₹ {formattedExpense}</Text>
             </AnimatedRipple>
-            
         </Animated.View>
 
     )

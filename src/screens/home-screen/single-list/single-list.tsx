@@ -45,7 +45,7 @@ const SingleList: FC<any> = ({ item, selectLit, index }) => {
                     </Animated.View>
                     <Text style={styles.title}>{item?.description}</Text>
                 </View>
-                <Text style={[styles.title, { color: "black", marginLeft: 0, fontWeight: "700", fontFamily: bold }]}>₹ {parseInt(item?.expense).toFixed(2)}</Text>
+                <Text style={[styles.title, { color: "black", marginLeft: 0, fontWeight: "700", fontFamily: bold }]}>₹ {parseFloat(item?.expense).toFixed(2)}</Text>
             </AnimatedRipple>
         </Animated.View>
 

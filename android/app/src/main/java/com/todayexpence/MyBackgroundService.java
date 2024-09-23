@@ -72,6 +72,7 @@ public class MyBackgroundService extends Service {
 
             if (tempExpense != null && tempDescription != null) {
                 storeExpenseToDatabase(tempExpense, tempDescription);
+//                sendBroadcastToReactNative(tempExpense, tempDescription);
                 tempExpense = null; // Clear the temporary variable after storing
                 tempDescription = null; // Clear the temporary variable after storing
                 showNotification(null); // Refresh notification with updated total
@@ -110,6 +111,13 @@ public class MyBackgroundService extends Service {
         }
     }
 
+    private void sendBroadcastToReactNative(String expense, String description) {
+        Intent intent = new Intent("com.todayexpence.EXPENSE_ADDED");
+        intent.putExtra("expense", expense);
+        intent.putExtra("description", description);
+        sendBroadcast(intent);
+    }
+
     private double getTotalExpense() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String currentDate = getCurrentDate();
@@ -120,10 +128,13 @@ public class MyBackgroundService extends Service {
         if (cursor.moveToFirst()) {
             double total = cursor.getDouble(0);
             cursor.close();
-            return total;
+            // Return the total as a double
+            return Math.round(total * 100.0) / 100.0; // Round to 2 decimal places
         }
-        return 0;
+        return 0.00;
     }
+
+
 
     private void showNotification(@Nullable String warningMessage) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
