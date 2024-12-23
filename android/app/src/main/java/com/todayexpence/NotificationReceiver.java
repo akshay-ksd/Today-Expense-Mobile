@@ -35,15 +35,28 @@ public class NotificationReceiver extends BroadcastReceiver {
 
         ExpenseReport report = getExpenseReport(context); // Get the daily expense report
 
-        // Construct the notification body
-        String notificationBody = String.format(
-                "Daily Expense Summary:\n" +
-                        "1) Total Expenses for Today: ₹ %.2f\n" +
-                        "2) Most Money Spent on: %s (₹ %.2f)\n" +
-                        "3) Least Money Spent on: %s (₹ %.2f)",
-                report.totalExpense, report.mostSpentDescription, report.mostSpentAmount,
-                report.leastSpentDescription, report.leastSpentAmount
-        );
+        String notificationBody;
+
+        if (report.totalExpense == 0) {
+            // If no expenses were logged for the day
+            notificationBody = "📊 No expenses logged today!\n\n" +
+                    "Remember to track your daily expenses to stay on top of your budget. 💡";
+        } else {
+            // Construct the usual notification body if there are expenses
+            notificationBody = String.format(
+                    "🎉 Here's your spending summary for the day:\n\n" +
+                            "💸 Total spent: ₹ %.2f\n\n" +
+                            "🍕 Most spent on: %s (₹ %.2f)\n\n" +
+                            "🛍️ Least spent on: %s (₹ %.2f)\n\n" +
+                            "Keep tracking your expenses and stay on top of your budget! 💪",
+                    report.totalExpense, report.mostSpentDescription, report.mostSpentAmount,
+                    report.leastSpentDescription, report.leastSpentAmount
+            );
+        }
+
+
+
+
 
         Notification notification = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -56,7 +69,9 @@ public class NotificationReceiver extends BroadcastReceiver {
         }
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, notification);
+        notificationManager.notify(2, notification);
+
+        AlarmUtils.rescheduleNextDay(context);
     }
 
     private ExpenseReport getExpenseReport(Context context) {

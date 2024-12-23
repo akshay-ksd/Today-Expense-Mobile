@@ -31,6 +31,7 @@ public class MainActivity extends ReactActivity {
     super.onCreate(savedInstanceState);
     try {
       AlarmUtils.scheduleDailyNotification(this);
+      AlarmUtils.scheduleDailyLogReminder(this);
     } catch (Exception e) {
       Log.e("AlarmError", "Error scheduling notification", e);
     }

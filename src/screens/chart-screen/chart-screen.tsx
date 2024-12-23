@@ -5,17 +5,21 @@ import Header from './header/header'
 import BarChartScreen from './bar-chart/bar-chart'
 import PieChartScreen from './pie-chart/pie-chart-screen'
 import _ from 'lodash';
-
+import { useNavigation } from '@react-navigation/native'
 const ChartScreen = () => {
     const [loading, setLoading] = useState(true);
     const [total, setTotal] = useState(0);
+
+    const lastDate = useRef<any>({})
 
     const { BackgroundService, ExpenseModule } = NativeModules;
 
     const pieChartRef: any = useRef();
     const barChartRef: any = useRef();
+    const navigation:any = useNavigation() 
 
     const filterData = (type: any, date: any) => {
+        lastDate.current = {type,date}
         setTimeout(() => {
             if (type == "D") {
                 const year = date.getFullYear();
@@ -138,10 +142,16 @@ const ChartScreen = () => {
             console.error('Error fetching expenses:', error);
         }
     };
+
+    const showCategory =()=>{
+        setTimeout(() => {
+            navigation.navigate("CategoryScreen",{lastDate:lastDate.current})
+        }, 100);
+    }
     return (
         <View style={styles.container}>
             <Header filterData={filterData} total={total} />
-            <PieChartScreen ref={pieChartRef} />
+            <PieChartScreen ref={pieChartRef} showCategory={showCategory}/>
             <BarChartScreen ref={barChartRef} />
         </View>
     )

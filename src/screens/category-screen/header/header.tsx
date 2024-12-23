@@ -7,11 +7,19 @@ import DailyTab from '../../../components/molecule/daily-tab/daily-tab';
 import MonthTab from '../../../components/molecule/month-tab/month-tab';
 import YearTab from '../../../components/molecule/year-tab/year-tab';
 import { SegmentedControl } from '../../../components/molecule/segment-control/segment-control';
-const Header: FC<any> = ({ filterData, total }) => {
-    const [selectedTab, setSelectedTab] = useState("Daily")
-    const { BackgroundService, ExpenseModule } = NativeModules;
+const Header: FC<any> = ({ filterData, total,defaultData}) => {
     const [selectedOption, setSelectedOption] = useState('Daily');
-    const options = ['Daily', 'Monthly', 'Yearly'];
+
+    useEffect(()=>{
+        if(defaultData){
+            let types:any = {
+                Y: "Yearly",
+                M: "Monthly",
+                D: "Daily"
+            }
+            setSelectedOption(types[defaultData?.type])
+        }
+    },[])
 
     const Box: FC<any> = ({ title }) => {
         return (
@@ -43,9 +51,9 @@ const Header: FC<any> = ({ filterData, total }) => {
                 <Box title={"Monthly"} />
                 <Box title={"Yearly"} />
             </View>
-            {selectedOption == "Daily" && (<DailyTab filterByDaily={filterByDaily} total={total} />)}
-            {selectedOption == "Monthly" && (<MonthTab filterMonth={filterMonth} total={total} />)}
-            {selectedOption == "Yearly" && (<YearTab filterYear={filterYear} total={total} />)}
+            {selectedOption == "Daily" && (<DailyTab filterByDaily={filterByDaily} total={total} defaultDate={defaultData?.date}/>)}
+            {selectedOption == "Monthly" && (<MonthTab filterMonth={filterMonth} total={total} defaultDate={defaultData?.date}/>)}
+            {selectedOption == "Yearly" && (<YearTab filterYear={filterYear} total={total} defaultDate={defaultData?.date}/>)}
         </View>
     )
 }

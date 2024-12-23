@@ -7,15 +7,15 @@ import Animated, { FadeIn, ZoomIn, ZoomInDown, ZoomInEasyUp } from 'react-native
 import DatePicker from 'react-native-date-picker'
 import { useIsFocused } from '@react-navigation/native';
 
-const DailyTab: React.FC<any> = ({filterByDaily,total}) => {
-    const [currentDate, setCurrentDate] = useState<Date>(new Date());
+const DailyTab: React.FC<any> = ({filterByDaily,total,defaultDate}) => {
+    const [currentDate, setCurrentDate] = useState<Date>(defaultDate?new Date(defaultDate):new Date());
     const [open,setOpen] = useState<any>(false);
     const isFocused = useIsFocused()
 
     useEffect(() => {
         if(isFocused){
-            setCurrentDate(new Date());
-            filterByDaily(new Date())
+            setCurrentDate(defaultDate?new Date(defaultDate):new Date());
+            filterByDaily(defaultDate?new Date(defaultDate):new Date())
         }
     }, [isFocused]);
 

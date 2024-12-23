@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import ScreenRatio from "../../../components/constants/ScreenRatio";
-import { bold, medium } from "../../../components/constants/fonts";
+import { bold, medium, semi_bold } from "../../../components/constants/fonts";
 
 const styles = StyleSheet.create({
     container:{
@@ -32,9 +32,9 @@ const styles = StyleSheet.create({
         fontFamily: medium
     },
     scrollView: {
-        marginTop: 10,
+        marginTop: 40,
         width: ScreenRatio.width /2.5,
-        height:ScreenRatio.height/4.3,
+        height:ScreenRatio.height/5.5,
         // backgroundColor:"red",
         position:"absolute",
         left:ScreenRatio.width /1.7
@@ -55,7 +55,20 @@ const styles = StyleSheet.create({
         color: '#7F7F7F',
         fontFamily:medium
       },
-     
+      footer:{
+        flexDirection:"column",
+        alignItems:"flex-start",
+        backgroundColor:"#f2f2f2",
+        marginLeft:"5%",
+        padding:10,
+        borderRadius:10
+      },
+      footerText:{
+        fontSize:13,
+        fontFamily:semi_bold,
+        color:"black",
+        margin:2
+      }
 });
 
 export default styles

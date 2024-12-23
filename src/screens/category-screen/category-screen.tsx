@@ -1,5 +1,5 @@
 import { View, Text, ActivityIndicator, NativeModules } from 'react-native'
-import React, { useRef, useState } from 'react'
+import React, { FC, useEffect, useRef, useState } from 'react'
 import styles from './style'
 import Header from '../../components/molecule/header/header'
 import SingleCategory from './single-category/single-category'
@@ -11,11 +11,13 @@ import _ from 'lodash';
 import Animated, { ZoomIn, ZoomInEasyDown, ZoomOut } from 'react-native-reanimated'
 import LottieView from 'lottie-react-native'
 
-const CategoryScreen = () => {
+const CategoryScreen:FC<any> = (props) => {
   const [loading, setLoading] = useState(true);
   const [lastDate, setLastDate] = useState<any>();
   const [lastType, setLastType] = useState<any>();
   const [total, setTotal] = useState(0);
+  const dateFromChart = useRef(props.route.params?.lastDate)
+
 
   const recyclerRef = useRef<SimpleRecycler>(null);
   const { BackgroundService, ExpenseModule } = NativeModules;
@@ -25,6 +27,12 @@ const CategoryScreen = () => {
     // ... other fields
   };
   let usedColors: any = [];
+
+  useEffect(()=>{
+    if(dateFromChart){
+      filterData(dateFromChart.current?.type,dateFromChart.current?.date)
+    }
+  },[])
 
 
   function parseDate(dateString: string): Date {
@@ -161,6 +169,7 @@ const CategoryScreen = () => {
   };
 
   const filterData = async (type: any, date: any) => {
+    dateFromChart.current = null
     setLoading(true)
     setLastType(type)
     setLastDate(date)
@@ -185,6 +194,13 @@ const CategoryScreen = () => {
       return
     }
   }
+
+  const loadData =(type:any,date:any)=> {
+    if(!dateFromChart.current){
+      console.log("dateFromChart",dateFromChart)
+      filterData(type,date)
+    }
+  }
   const emptyText =   <LottieView source={require('../../assets/lottie/noData.json')} autoPlay loop style={{ height: 120, width: 120 }} />
 
   const rowRenderer = (
@@ -196,10 +212,12 @@ const CategoryScreen = () => {
     return <SingleCategory item={data?.item} />;
   };
 
+  
+
   return (
     <Animated.View style={styles.container} entering={ZoomIn.duration(400)}>
       <Header title={"Category"} />
-      <DateHeader total={total} filterData={filterData} />
+      <DateHeader total={total} filterData={loadData} defaultData={props.route.params?.lastDate}/>
       {loading ? (
         <View style={styles.center}>
           <LottieView source={require('../../assets/lottie/loader.json')} autoPlay loop style={{ height: 150, width: 150 }} />

@@ -6,14 +6,14 @@ import Ripple from 'react-native-material-ripple';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { useIsFocused } from '@react-navigation/native';
 
-const MonthTab: React.FC<any> = ({filterMonth,total}) => {
+const MonthTab: React.FC<any> = ({filterMonth,total,defaultDate}) => {
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const isFocused = useIsFocused()
     useEffect(() => {
         // This will update the state when the component mounts
         if(isFocused){
-            setCurrentDate(new Date());
-            filterMonth(new Date())
+            setCurrentDate(defaultDate?new Date(defaultDate):new Date());
+            filterMonth(defaultDate?new Date(defaultDate):new Date())
         }
     }, [isFocused]);
 
